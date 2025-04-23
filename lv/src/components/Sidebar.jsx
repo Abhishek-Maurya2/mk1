@@ -51,13 +51,13 @@ const Sidebar = ({ className }) => {
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:text-primary",
+                "flex items-center gap-3 rounded-full px-6 py-4 text-sm transition-all hover:text-primary",
                 location.pathname === item.href 
-                  ? "bg-muted font-medium text-primary" 
+                  ? "bg-primary font-medium text-secondary hover:text-secondary" 
                   : "text-muted-foreground"
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-5 w-5" />
               {item.title}
             </Link>
           ))}
