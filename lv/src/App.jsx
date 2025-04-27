@@ -8,6 +8,8 @@ import SettingsPage from './components/SettingsPage'; // Changed from ProfilePag
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+import LandingPage from './components/LandingPage';
+import useUserStore from './store/userStore';
 
 // Layout component to include Navbar and Sidebar
 const MainLayout = ({ children }) => {
@@ -27,18 +29,22 @@ const MainLayout = ({ children }) => {
 // Component to conditionally render layout
 const AppContent = () => {
   const location = useLocation();
-  const showLayout = location.pathname !== '/authentication'; // Don't show layout on auth page
+  const showLayout = location.pathname !== '/authentication' && location.pathname !== '/'; // Don't show layout on auth or landing page
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
   return (
     <>
-      {showLayout ? (
+      {location.pathname === '/' ? (
+        isAuthenticated ? (
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        ) : (
+          <LandingPage />
+        )
+      ) : showLayout ? (
         <MainLayout>
           <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
             <Route path="/resources" element={
               <ProtectedRoute>
                 <ResourcesPage />
