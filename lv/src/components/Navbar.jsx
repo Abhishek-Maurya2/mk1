@@ -22,10 +22,11 @@ const Navbar = () => {
   
   // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!user || !user.name) return 'U';
-    return user.name
+    const name = user?.user_metadata?.full_name || user?.user_metadata?.name || '';
+    if (!name) return 'U';
+    return name
       .split(' ')
-      .map(name => name[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
@@ -56,16 +57,17 @@ const Navbar = () => {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <div className="hidden sm:block">
-                <span className="text-sm font-medium">Welcome, {user?.name || 'User'}</span>
+                <span className="text-sm font-medium">Welcome, {user?.user_metadata?.full_name || user?.user_metadata?.name || 'User'}</span>
               </div>
               <div className="relative group">
                 <Link to="/settings">
                   <Avatar>
-                    <AvatarImage src={user?.avatarUrl} alt={user?.name || 'User profile'} />
+                    <AvatarImage src={user?.user_metadata?.avatarUrl} alt={user?.user_metadata?.full_name || user?.user_metadata?.name || 'User profile'} />
                     <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                 </Link>
                 <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                  <div className="px-4 py-2 text-xs text-muted-foreground truncate">{user?.email}</div>
                   <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
                   </Link>

@@ -11,16 +11,18 @@ import { useThemeStore } from '../store/themeStore';
 
 const SettingsPage = () => {
   const { user, updateProfile } = useUserStore();
+
+  console.log(user);
   const { resources } = useResourceStore();
   const { theme, setTheme } = useThemeStore();
   const [isLoading, setIsLoading] = useState(false);
   
   // Profile form state
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.user_metadata?.full_name || user?.user_metadata?.name || '',
     email: user?.email || '',
-    avatarUrl: user?.avatarUrl || '',
-    bio: user?.bio || '',
+    avatarUrl: user?.user_metadata?.avatarUrl || '',
+    bio: user?.user_metadata?.bio || '',
   });
   
   // Resource statistics
@@ -50,7 +52,11 @@ const SettingsPage = () => {
     
     try {
       // Update profile in the store
-      updateProfile(formData);
+      await updateProfile({
+        full_name: formData.name,
+        avatarUrl: formData.avatarUrl,
+        bio: formData.bio,
+      });
       
       // Show success message
       alert('Profile updated successfully');

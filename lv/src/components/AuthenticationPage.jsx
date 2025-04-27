@@ -12,6 +12,7 @@ const AuthenticationPage = () => {
   const location = useLocation();
   const { login, register } = useUserStore();
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Get the page the user was trying to access before being redirected
   const from = location.state?.from?.pathname || '/';
@@ -38,42 +39,49 @@ const AuthenticationPage = () => {
     setRegisterData({ ...registerData, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    
-    const result = login(loginData);
-    
+    setLoading(true);
+
+    const result = await login(loginData);
+
+    setLoading(false);
     if (result.success) {
-      // Navigate back to the page the user was trying to access
       navigate(from, { replace: true });
     } else {
       setError(result.error || 'Login failed. Please check your credentials.');
     }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-    
-    // Validate password match
+
     if (registerData.password !== registerData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
-    // Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(registerData.email)) {
       setError('Please enter a valid email address');
       return;
     }
-    
-    // Register user
-    register(registerData);
-    
-    // Navigate back to the page the user was trying to access
-    navigate(from, { replace: true });
+
+    setLoading(true);
+    const result = await register(registerData);
+    setLoading(false);
+
+    if (result.success) {
+      if (result.user) {
+        navigate(from, { replace: true });
+      } else {
+        setError(result.message || 'Registration successful. Please check your email.');
+      }
+    } else {
+      setError(result.error || 'Registration failed.');
+    }
   };
 
   return (
@@ -91,23 +99,23 @@ const AuthenticationPage = () => {
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
-            
+
             {error && (
               <div className="p-3 mb-4 text-sm text-red-500 bg-red-100 border border-red-200 rounded">
                 {error}
               </div>
             )}
-            
+
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    name="email" 
-                    type="email" 
-                    placeholder="your.email@example.com" 
-                    required 
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
                     value={loginData.email}
                     onChange={handleLoginChange}
                   />
@@ -119,70 +127,70 @@ const AuthenticationPage = () => {
                       Forgot password?
                     </Button>
                   </div>
-                  <Input 
-                    id="password" 
-                    name="password" 
-                    type="password" 
-                    required 
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
                     value={loginData.password}
                     onChange={handleLoginChange}
                   />
                 </div>
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Logging in...' : 'Login'}
                 </Button>
               </form>
             </TabsContent>
-            
+
             <TabsContent value="register">
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input 
-                    id="name" 
-                    name="name" 
-                    placeholder="John Doe" 
-                    required 
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    required
                     value={registerData.name}
                     onChange={handleRegisterChange}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
-                  <Input 
-                    id="register-email" 
-                    name="email" 
-                    type="email" 
-                    placeholder="your.email@example.com" 
-                    required 
+                  <Input
+                    id="register-email"
+                    name="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
                     value={registerData.email}
                     onChange={handleRegisterChange}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-password">Password</Label>
-                  <Input 
-                    id="register-password" 
-                    name="password" 
-                    type="password" 
-                    required 
+                  <Input
+                    id="register-password"
+                    name="password"
+                    type="password"
+                    required
                     value={registerData.password}
                     onChange={handleRegisterChange}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input 
-                    id="confirm-password" 
-                    name="confirmPassword" 
-                    type="password" 
-                    required 
+                  <Input
+                    id="confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    required
                     value={registerData.confirmPassword}
                     onChange={handleRegisterChange}
                   />
                 </div>
-                <Button type="submit" className="w-full">
-                  Create Account
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
             </TabsContent>
